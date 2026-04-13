@@ -14,7 +14,136 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      inquiries: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          message: string | null
+          name: string
+          phone: string
+          project_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          message?: string | null
+          name: string
+          phone: string
+          project_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string
+          project_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          images: string[] | null
+          location: string
+          name: string
+          price_range: string | null
+          property_type: Database["public"]["Enums"]["property_type"]
+          status: Database["public"]["Enums"]["project_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          images?: string[] | null
+          location: string
+          name: string
+          price_range?: string | null
+          property_type?: Database["public"]["Enums"]["property_type"]
+          status?: Database["public"]["Enums"]["project_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          images?: string[] | null
+          location?: string
+          name?: string
+          price_range?: string | null
+          property_type?: Database["public"]["Enums"]["property_type"]
+          status?: Database["public"]["Enums"]["project_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      units: {
+        Row: {
+          bhk_type: string | null
+          created_at: string
+          floor: number | null
+          id: string
+          images: string[] | null
+          price: number | null
+          project_id: string
+          size_sqft: number | null
+          status: Database["public"]["Enums"]["unit_status"]
+          unit_number: string
+          updated_at: string
+        }
+        Insert: {
+          bhk_type?: string | null
+          created_at?: string
+          floor?: number | null
+          id?: string
+          images?: string[] | null
+          price?: number | null
+          project_id: string
+          size_sqft?: number | null
+          status?: Database["public"]["Enums"]["unit_status"]
+          unit_number: string
+          updated_at?: string
+        }
+        Update: {
+          bhk_type?: string | null
+          created_at?: string
+          floor?: number | null
+          id?: string
+          images?: string[] | null
+          price?: number | null
+          project_id?: string
+          size_sqft?: number | null
+          status?: Database["public"]["Enums"]["unit_status"]
+          unit_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +152,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      project_status: "new_launch" | "under_construction" | "ready_to_move"
+      property_type:
+        | "flat"
+        | "villa"
+        | "commercial"
+        | "land"
+        | "builder_project"
+      unit_status: "available" | "booked" | "sold"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +286,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      project_status: ["new_launch", "under_construction", "ready_to_move"],
+      property_type: ["flat", "villa", "commercial", "land", "builder_project"],
+      unit_status: ["available", "booked", "sold"],
+    },
   },
 } as const
