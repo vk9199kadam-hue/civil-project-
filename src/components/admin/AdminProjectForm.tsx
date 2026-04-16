@@ -66,7 +66,10 @@ const AdminProjectForm = () => {
       const ext = file.name.split(".").pop();
       const path = `projects/${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
       const { error } = await supabase.storage.from("property-photos").upload(path, file);
-      if (!error) {
+      if (error) {
+        console.error("Upload error:", error);
+        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      } else {
         const { data } = supabase.storage.from("property-photos").getPublicUrl(path);
         newUrls.push(data.publicUrl);
       }
