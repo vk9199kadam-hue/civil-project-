@@ -7,9 +7,13 @@ if (!connectionString) {
   console.error("CRITICAL: DATABASE_URL is missing!");
 }
 
-export const sql = postgres(connectionString || '', {
-  ssl: { rejectUnauthorized: false }, // Necessary for some CockroachDB cloud environments
+// Strip query parameters for cleaner connection handling
+const cleanUrl = connectionString?.split('?')[0] || '';
+
+export const sql = postgres(cleanUrl, {
+  ssl: { rejectUnauthorized: false }, 
   prepare: false, 
   connect_timeout: 10,
 });
+
 
