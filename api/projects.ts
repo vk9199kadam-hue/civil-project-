@@ -17,9 +17,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (method === 'POST') {
       const { name, location, description, property_type, status, price_range, featured, images } = req.body;
+      console.log('Creating project:', name);
       const [newProject] = await sql`
         INSERT INTO projects (name, location, description, property_type, status, price_range, featured, images)
-        VALUES (${name}, ${location}, ${description}, ${property_type}, ${status}, ${price_range}, ${featured}, ${images})
+        VALUES (${name}, ${location}, ${description}, ${property_type}, ${status}, ${price_range}, ${featured}, ${images || []})
         RETURNING *
       `;
       return res.status(201).json(newProject);
@@ -28,6 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (method === 'PUT') {
       const { id } = req.query;
       const { name, location, description, property_type, status, price_range, featured, images } = req.body;
+      console.log('Updating project:', id);
       const [updatedProject] = await sql`
         UPDATE projects SET
           name = ${name},
@@ -37,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           status = ${status},
           price_range = ${price_range},
           featured = ${featured},
-          images = ${images},
+          images = ${images || []},
           updated_at = now()
         WHERE id = ${id as string}
         RETURNING *
@@ -47,6 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (method === 'DELETE') {
       const { id } = req.query;
+      console.log('Deleting project:', id);
       await sql`DELETE FROM projects WHERE id = ${id as string}`;
       return res.status(204).end();
     }
@@ -54,7 +57,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
     res.status(405).end(`Method ${method} Not Allowed`);
   } catch (error: any) {
-    console.error('API Error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('API Error details:', error);
+    res.status(500).json({ 
+      error: 'Database operation failed', 
+      details: error.message,
+      hint: 'Check if you have run the SQL schema in CockroachDB console' 
+    });
   }
 }
+
