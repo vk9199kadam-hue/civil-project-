@@ -19,14 +19,18 @@ const Contact = () => {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("inquiries").insert({
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim() || null,
-      message: form.message.trim() || null,
+    const res = await fetch("/api/inquiries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim() || null,
+        message: form.message.trim() || null,
+      }),
     });
     setSubmitting(false);
-    if (error) {
+    if (!res.ok) {
       toast({ title: "Failed to submit", variant: "destructive" });
     } else {
       toast({ title: "Message sent successfully!" });

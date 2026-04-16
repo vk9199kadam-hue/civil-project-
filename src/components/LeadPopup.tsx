@@ -30,15 +30,20 @@ const LeadPopup = () => {
     if (!name || !phone) return;
 
     setLoading(true);
-    const { error } = await supabase.from("inquiries").insert({
-      name,
-      phone,
-      message: "Lead generation popup (30s interest)",
+    const res = await fetch("/api/inquiries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        phone,
+        message: "Lead generation popup (30s interest)",
+      }),
     });
 
     setLoading(false);
-    if (error) {
-      toast({ title: "Submisson failed", description: error.message, variant: "destructive" });
+    if (!res.ok) {
+      const data = await res.json();
+      toast({ title: "Submisson failed", description: data.error, variant: "destructive" });
     } else {
       setSubmitted(true);
       sessionStorage.setItem("lead_popup_shown", "true");

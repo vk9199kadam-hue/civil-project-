@@ -11,18 +11,16 @@ const AdminInquiries = () => {
   const { data: inquiries = [], isLoading } = useQuery({
     queryKey: ["admin-inquiries"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("inquiries")
-        .select("*, projects(name)")
-        .order("created_at", { ascending: false });
-      return data || [];
+      const res = await fetch("/api/inquiries");
+      if (!res.ok) throw new Error("Failed to fetch inquiries");
+      return res.json();
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("inquiries").delete().eq("id", id);
-      if (error) throw error;
+      const res = await fetch(`/api/inquiries?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-inquiries"] });

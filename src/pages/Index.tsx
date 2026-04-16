@@ -32,12 +32,10 @@ const Index = () => {
   const { data: projects = [] } = useQuery({
     queryKey: ["featured-projects"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("projects")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(6);
-      return data || [];
+      const res = await fetch("/api/projects");
+      if (!res.ok) throw new Error("Failed to fetch projects");
+      const data = await res.json();
+      return data.slice(0, 6); // Simulate limit(6)
     },
   });
 

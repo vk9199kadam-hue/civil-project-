@@ -16,8 +16,9 @@ const Projects = () => {
   const { data: projects = [] } = useQuery({
     queryKey: ["all-projects"],
     queryFn: async () => {
-      const { data } = await supabase.from("projects").select("*").order("created_at", { ascending: false });
-      return data || [];
+      const res = await fetch("/api/projects");
+      if (!res.ok) throw new Error("Failed to fetch projects");
+      return res.json();
     },
   });
 

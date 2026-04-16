@@ -28,8 +28,9 @@ const ProjectDetail = () => {
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", id],
     queryFn: async () => {
-      const { data } = await supabase.from("projects").select("*").eq("id", id!).single();
-      return data;
+      const res = await fetch(`/api/projects?id=${id}`);
+      if (!res.ok) throw new Error("Project not found");
+      return res.json();
     },
     enabled: !!id,
   });
@@ -37,8 +38,9 @@ const ProjectDetail = () => {
   const { data: units = [] } = useQuery({
     queryKey: ["units", id],
     queryFn: async () => {
-      const { data } = await supabase.from("units").select("*").eq("project_id", id!).order("unit_number");
-      return data || [];
+      const res = await fetch(`/api/units?project_id=${id}`);
+      if (!res.ok) throw new Error("Failed to fetch units");
+      return res.json();
     },
     enabled: !!id,
   });
@@ -50,15 +52,19 @@ const ProjectDetail = () => {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("inquiries").insert({
-      project_id: id,
-      name: inquiryForm.name.trim(),
-      phone: inquiryForm.phone.trim(),
-      email: inquiryForm.email.trim() || null,
-      message: inquiryForm.message.trim() || null,
+    const res = await fetch("/api/inquiries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        project_id: id,
+        name: inquiryForm.name.trim(),
+        phone: inquiryForm.phone.trim(),
+        email: inquiryForm.email.trim() || null,
+        message: inquiryForm.message.trim() || null,
+      }),
     });
     setSubmitting(false);
-    if (error) {
+    if (!res.ok) {
       toast({ title: "Failed to submit", variant: "destructive" });
     } else {
       toast({ title: "Inquiry submitted! We'll get back to you soon." });

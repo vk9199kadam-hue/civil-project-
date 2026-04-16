@@ -29,7 +29,9 @@ const AdminUnits = () => {
   const { data: project } = useQuery({
     queryKey: ["project", projectId],
     queryFn: async () => {
-      const { data } = await supabase.from("projects").select("name").eq("id", projectId!).single();
+      const res = await fetch(`/api/projects?id=${projectId}`);
+      if (!res.ok) throw new Error("Failed to fetch project");
+      const data = await res.json();
       return data;
     },
     enabled: !!projectId,
@@ -38,15 +40,16 @@ const AdminUnits = () => {
   const { data: units = [], isLoading } = useQuery({
     queryKey: ["admin-units", projectId],
     queryFn: async () => {
-      const { data } = await supabase.from("units").select("*").eq("project_id", projectId!).order("unit_number");
-      return data || [];
+      const res = await fetch(`/api/units?project_id=${projectId}`);
+      if (!res.ok) throw new Error("Failed to fetch units");
+      return res.json();
     },
     enabled: !!projectId,
   });
 
   const addMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("units").insert({
+      const payload = {
         project_id: projectId!,
         unit_number: newUnit.unit_number.trim(),
         size_sqft: newUnit.size_sqft ? Number(newUnit.size_sqft) : null,
@@ -54,8 +57,13 @@ const AdminUnits = () => {
         price: newUnit.price ? Number(newUnit.price) : null,
         floor: newUnit.floor ? Number(newUnit.floor) : null,
         status: newUnit.status,
+      };
+      const res = await fetch("/api/units", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-      if (error) throw error;
+      if (!res.ok) throw new Error("Failed to add unit");
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-units", projectId] });
@@ -67,8 +75,8 @@ const AdminUnits = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("units").delete().eq("id", id);
-      if (error) throw error;
+      const res = await fetch(`/api/units?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-units", projectId] });

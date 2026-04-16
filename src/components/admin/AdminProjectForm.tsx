@@ -36,8 +36,9 @@ const AdminProjectForm = () => {
   const { data: existing } = useQuery({
     queryKey: ["project", projectId],
     queryFn: async () => {
-      const { data } = await supabase.from("projects").select("*").eq("id", projectId!).single();
-      return data;
+      const res = await fetch(`/api/projects?id=${projectId}`);
+      if (!res.ok) throw new Error("Failed to fetch project");
+      return res.json();
     },
     enabled: isEdit,
   });
@@ -81,12 +82,18 @@ const AdminProjectForm = () => {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const payload = { ...form, images };
-      if (isEdit) {
-        const { error } = await supabase.from("projects").update(payload).eq("id", projectId!);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("projects").insert(payload);
-        if (error) throw error;
+      const url = isEdit ? `/api/projects?id=${projectId}` : "/api/projects";
+      const method = isEdit ? "PUT" : "POST";
+      
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Save failed");
       }
     },
     onSuccess: () => {
