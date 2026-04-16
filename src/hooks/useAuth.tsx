@@ -48,6 +48,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+      
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("Non-JSON response:", text);
+        return { error: new Error("Server error: Check if you are running 'vercel dev'") };
+      }
+
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("auth_token", data.token);
