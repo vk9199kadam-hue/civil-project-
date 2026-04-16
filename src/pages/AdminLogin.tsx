@@ -38,6 +38,13 @@ const AdminLogin = () => {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Signing in..." : "Sign In"}
           </Button>
+          <div className="relative py-2">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+            <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Dev Testing</span></div>
+          </div>
+          <Button type="button" variant="outline" className="w-full" onClick={() => navigate("/admin")}>
+            Bypass Login (Demo Mode)
+          </Button>
         </form>
       </div>
     </div>
